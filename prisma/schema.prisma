@@ -1,0 +1,100 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Major {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  abbr    String
+  name    String
+  faculty String
+
+  voters Voter[]
+
+  @@unique([abbr])
+}
+
+enum ValidatorStatus {
+  INACTIVE
+  ACTIVE
+}
+
+model Validator {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  username String
+  password String
+  status   ValidatorStatus
+
+  validationData ValidationData[]
+
+  @@unique([username])
+}
+
+enum VoterStatus {
+  GRADUATED
+  INACTIVE
+  ACTIVE
+}
+
+model Voter {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  nim       String
+  name      String
+  status    VoterStatus
+  majorId   String      @db.ObjectId
+  majorAbbr String
+
+  voteData       VoteData[]
+  validationData ValidationData[]
+  major          Major            @relation(fields: [majorId], references: [id], onDelete: NoAction)
+
+  @@unique([nim])
+  @@index([name])
+  @@index([majorId])
+  @@index([majorAbbr])
+}
+
+model ValidationData {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  validatorId       String   @db.ObjectId
+  validatorUsername String
+  voterId           String   @db.ObjectId
+  voterNim          String
+  validationTime    DateTime @default(now())
+
+  validator Validator  @relation(fields: [validatorId], references: [id], onDelete: NoAction)
+  voter     Voter      @relation(fields: [voterId], references: [id], onDelete: NoAction)
+  voteData  VoteData[]
+
+  @@unique([voterId])
+  @@unique([voterNim])
+  @@index([validatorId])
+  @@index([validatorUsername])
+}
+
+model VoteData {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  voterId      String   @db.ObjectId
+  voterNim     String
+  poll         String
+  validationId String   @db.ObjectId
+  voteTime     DateTime @default(now())
+
+  validation ValidationData @relation(fields: [validationId], references: [id], onDelete: NoAction)
+  voter      Voter          @relation(fields: [voterId], references: [id], onDelete: NoAction)
+
+  @@unique([validationId])
+  @@index([voterId])
+}
+
+model MonitoringData {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  content      Json
+  creationTime DateTime @default(now())
+}
