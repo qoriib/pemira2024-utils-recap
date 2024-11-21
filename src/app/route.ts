@@ -7,7 +7,7 @@ export async function POST(req: Request) {
         JSON.stringify({
           error: "Invalid or missing API key",
         }),
-        { status: 401 }
+        { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -72,13 +72,13 @@ export async function POST(req: Request) {
       JSON.stringify({
         data: sortedRecapData,
       }),
-      { status: 200 }
+      { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (e: unknown) {
     console.error(e);
     return new Response(
       JSON.stringify({ error: "Terjadi kesalahan saat memproses data" }),
-      { status: 500 }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }
