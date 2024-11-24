@@ -1,6 +1,6 @@
 import { prisma } from "@/services/prisma.service";
 
-export const maxDuration = 120;
+export const maxDuration = 240;
 
 export async function POST(req: Request) {
   try {
